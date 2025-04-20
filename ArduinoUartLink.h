@@ -27,7 +27,7 @@ namespace vgs::link
     {
       if(m_serial->available())
       {
-        int raw = Serial.read();
+        int raw = m_serial->read();
 
         if(raw == -1)
         {

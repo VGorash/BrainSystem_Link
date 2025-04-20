@@ -2,10 +2,10 @@
 
 // link codes (each 1-byte)
 #define LINK_PLAYER_BUTTON 0x00 // 0000xxxx, x - player number(0000 - 1111, 16 players). V1: [0, 3], V2: [0, 15]
-#define LINK_LEDS_OFF 0x10 // 00010000, no data. V1, V2
+#define LINK_LEDS_OFF 0x10 // 0001xxxx, no data. V1, V2
 #define LINK_PLAYER_LED_ON 0x20 // 0010xxxx, x - player number(0000 - 1111, 16 players). V1: [4, 7], V2: [0, 15]
 #define LINK_PLAYER_LED_BLINK 0x30 // 0011xxxx, x - player number(0000 - 1111, 16 players) V1: [4, 7], V2: [0, 15]
-#define LINK_SIGNAL_LED_ON 0x40 // 01000000, no data. V1, V2
+#define LINK_SIGNAL_LED_ON 0x40 // 0100xxxx, no data. V1, V2
 #define LINK_DISPLAY_PLAYER_LED_ON 0x50 // 0101xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
 #define LINK_DISPLAY_PLAYER_LED_BLINK 0x60 // 0110xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
 // 0x70 (0111xxxx) reserved for future use
@@ -102,6 +102,12 @@ void UartLink::tickV1()
   {
     m_data = m_data % 4;
   }
+  
+  if(m_command == Command::DisplayPlayerLedOn || m_command == Command::DisplayPlayerLedBlink) // not supported in v1
+  {
+    m_data = 0;
+	m_command == Command:None;
+  }
 }
 
 void UartLink::tickV2()
@@ -143,12 +149,12 @@ void UartLink::sendV1(Command command, unsigned int data)
 
   if(command == Command::DisplayPlayerLedOn)
   {
-    command = Command::PlayerLedOn;
+    return; // not supported in v1;
   }
 
   if(command == Command::DisplayPlayerLedBlink)
   {
-    command = Command::PlayerLedBlink;
+    return; // not supported in v1;
   }
 
   if(command == Command::PlayerLedOn || command == Command::PlayerLedBlink)
