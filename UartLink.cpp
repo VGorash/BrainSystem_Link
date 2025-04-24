@@ -106,7 +106,7 @@ void UartLink::tickV1()
   if(m_command == Command::DisplayPlayerLedOn || m_command == Command::DisplayPlayerLedBlink) // not supported in v1
   {
     m_data = 0;
-    m_command == Command:None;
+    m_command == Command::None;
   }
 }
 
