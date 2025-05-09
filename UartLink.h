@@ -28,8 +28,8 @@ namespace vgs::link
     void send(Command command, unsigned int data = 0) override;
 
   protected:
-    virtual void writeUartData(char data) = 0; // write 1 byte, platform-specific
-    virtual bool readUartData(char& data) = 0; // read 1 byte if available and return true if byte has been read, platform-specific
+    virtual void writeUartData(unsigned char data) = 0; // write 1 byte, platform-specific
+    virtual bool readUartData(unsigned char& data) = 0; // read 1 byte if available and return true if byte has been read, platform-specific
 
     void tickV1();
     void tickV2();

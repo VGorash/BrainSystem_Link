@@ -18,12 +18,12 @@ namespace vgs::link
     }
 
   protected:
-    void writeUartData(char data) override
+    void writeUartData(unsigned char data) override
     {
       m_serial->write(data);
     }
 
-    bool readUartData(char& data) override
+    bool readUartData(unsigned char& data) override
     {
       if(m_serial->available())
       {

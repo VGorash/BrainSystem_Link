@@ -115,7 +115,7 @@ void UartLink::tickV2()
   m_command = Command::None;
   m_data = 0;
 
-  char raw;
+  unsigned char raw;
 
   if(!readUartData(raw))
   {
@@ -129,8 +129,8 @@ void UartLink::tickV2()
     return;
   }
 
-  char command = raw & 0xF0;
-  char payload = raw & 0x0F;
+  unsigned char command = raw & 0xF0;
+  unsigned char payload = raw & 0x0F;
 
   for(int i=0; i<numCommands; i++)
   {
@@ -174,7 +174,7 @@ void UartLink::sendV2(Command command, unsigned int data)
 
   if(command == Command::UpdateTime)
   {
-    writeUartData((char)LINK_UPDATE_TIME | (char)data);
+    writeUartData((unsigned char)LINK_UPDATE_TIME | (unsigned char)data);
     return;
   }
 
@@ -182,7 +182,7 @@ void UartLink::sendV2(Command command, unsigned int data)
   {
     if(command == commands[i])
     {
-      writeUartData((char)uartCommands[i] | ((char)data & 0x0F));
+      writeUartData((unsigned char)uartCommands[i] | ((unsigned char)data & 0x0F));
       break;
     }
   }
