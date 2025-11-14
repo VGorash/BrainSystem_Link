@@ -6,13 +6,14 @@ namespace vgs::link
   enum class Command
   {
     None = 0,
-    PlayerButton,
-    PlayerLedOn,
-    DisplayPlayerLedOn, // can be used to communicate with external display, allows broadcasting
-    PlayerLedBlink, 
-    DisplayPlayerLedBlink, // can be used to communicate with external display, allows broadcasting
-    SignalLedOn,
-    LedsOff,
+    ButtonPressed,
+    CorrectPressSignal,
+    DisplayCorrectPressSignal,  // can be used to communicate with external display, allows broadcasting
+    FalstartPressSignal, 
+    DisplayFalstartPressSignal, // can be used to communicate with external display, allows broadcasting
+    PendingPressSignal,
+    GameStartSignal,
+    Clear,
     UpdateTime
   };
 

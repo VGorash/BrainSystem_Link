@@ -1,40 +1,42 @@
 #include "UartLink.h"
 
 // link codes (each 1-byte)
-#define LINK_PLAYER_BUTTON 0x00 // 0000xxxx, x - player number(0000 - 1111, 16 players). V1: [0, 3], V2: [0, 15]
-#define LINK_LEDS_OFF 0x10 // 0001xxxx, no data. V1, V2
-#define LINK_PLAYER_LED_ON 0x20 // 0010xxxx, x - player number(0000 - 1111, 16 players). V1: [4, 7], V2: [0, 15]
-#define LINK_PLAYER_LED_BLINK 0x30 // 0011xxxx, x - player number(0000 - 1111, 16 players) V1: [4, 7], V2: [0, 15]
-#define LINK_SIGNAL_LED_ON 0x40 // 0100xxxx, no data. V1, V2
-#define LINK_DISPLAY_PLAYER_LED_ON 0x50 // 0101xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
-#define LINK_DISPLAY_PLAYER_LED_BLINK 0x60 // 0110xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
-// 0x70 (0111xxxx) reserved for future use
+#define LINK_BUTTON_PRESSED 0x00 // 0000xxxx, x - player number(0000 - 1111, 16 players). V1: [0, 3], V2: [0, 15]
+#define LINK_CLEAR 0x10 // 0001xxxx, no data. V1, V2
+#define LINK_CORRECT_PRESS_SIGNAL 0x20 // 0010xxxx, x - player number(0000 - 1111, 16 players). V1: [4, 7], V2: [0, 15]
+#define LINK_FALSTART_PRESS_SIGNAL 0x30 // 0011xxxx, x - player number(0000 - 1111, 16 players) V1: [4, 7], V2: [0, 15]
+#define LINK_GAME_START_SIGNAL 0x40 // 0100xxxx, no data. V1, V2
+#define LINK_DISPLAY_CORRECT_PRESS_SIGNAL 0x50 // 0101xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
+#define LINK_DISPLAY_FALSTART_PRESS_SIGNAL 0x60 // 0110xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
+#define LINK_PENDING_PRESS_SIGNAL 0x70 //0111xxxx, x - player number(0000 - 1111, 16 players) only V2: [0, 15]
 #define LINK_UPDATE_TIME 0x80 // 1xxxxxxx - x time in seconds (0000000 - 1111111, 0-127 seconds) V1, V2: [0, 127]
 
 using namespace vgs::link;
 
-constexpr int numCommands = 7;
+constexpr int numCommands = 8;
 
 constexpr char uartCommands[numCommands] = 
 {
-  LINK_PLAYER_BUTTON, 
-  LINK_LEDS_OFF, 
-  LINK_PLAYER_LED_ON, 
-  LINK_DISPLAY_PLAYER_LED_ON, 
-  LINK_PLAYER_LED_BLINK, 
-  LINK_DISPLAY_PLAYER_LED_BLINK, 
-  LINK_SIGNAL_LED_ON
+  LINK_BUTTON_PRESSED,
+  LINK_CLEAR,
+  LINK_CORRECT_PRESS_SIGNAL,
+  LINK_DISPLAY_CORRECT_PRESS_SIGNAL,
+  LINK_FALSTART_PRESS_SIGNAL,
+  LINK_DISPLAY_FALSTART_PRESS_SIGNAL,
+  LINK_PENDING_PRESS_SIGNAL,
+  LINK_GAME_START_SIGNAL
 };
 
 constexpr Command commands[numCommands] = 
 {
-  Command::PlayerButton,
-  Command::LedsOff,
-  Command::PlayerLedOn,
-  Command::DisplayPlayerLedOn,
-  Command::PlayerLedBlink, 
-  Command::DisplayPlayerLedBlink,
-  Command::SignalLedOn
+  Command::ButtonPressed,
+  Command::Clear,
+  Command::CorrectPressSignal,
+  Command::DisplayCorrectPressSignal,
+  Command::FalstartPressSignal, 
+  Command::DisplayFalstartPressSignal,
+  Command::PendingPressSignal,
+  Command::GameStartSignal
 };
 
 UartLink::UartLink(UartLinkVersion version) : m_version(version)
@@ -98,12 +100,12 @@ void UartLink::tickV1()
   tickV2();
 
   // process difference
-  if(m_command == Command::PlayerLedOn || m_command == Command::PlayerLedBlink)
+  if(m_command == Command::CorrectPressSignal || m_command == Command::FalstartPressSignal)
   {
     m_data = m_data % 4;
   }
   
-  if(m_command == Command::DisplayPlayerLedOn || m_command == Command::DisplayPlayerLedBlink) // not supported in v1
+  if(m_command == Command::DisplayCorrectPressSignal || m_command == Command::DisplayFalstartPressSignal || m_command == Command::PendingPressSignal) // not supported in v1
   {
     m_data = 0;
     m_command == Command::None;
@@ -147,17 +149,17 @@ void UartLink::sendV1(Command command, unsigned int data)
 {
   // process difference
 
-  if(command == Command::DisplayPlayerLedOn)
+  if(command == Command::DisplayCorrectPressSignal)
   {
     return; // not supported in v1;
   }
 
-  if(command == Command::DisplayPlayerLedBlink)
+  if(command == Command::DisplayFalstartPressSignal)
   {
     return; // not supported in v1;
   }
 
-  if(command == Command::PlayerLedOn || command == Command::PlayerLedBlink)
+  if(command == Command::CorrectPressSignal || command == Command::FalstartPressSignal)
   {
     data = 4 + (data % 4);
   }
