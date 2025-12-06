@@ -3,8 +3,6 @@
 
 #include "Link.h"
 
-#define UART_LINK_MAX_PLAYERS 16
-
 namespace vgs::link
 {   
 
