@@ -25,8 +25,35 @@ namespace vgs::link
 
 class EspNowHandler
 {
+protected:
+  virtual void onCommandV2(const uint8_t* address, uint8_t data){}
+  virtual void onPingRequest(const uint8_t* address, uint8_t data){}
+  virtual void onPingResponse(const uint8_t* address, uint8_t data){}
+  virtual void onPairingRequest(const uint8_t* address, uint8_t data){}
+  virtual void onPairingResponse(const uint8_t* address, uint8_t data){}
+  
 public:
-  virtual void handleEspNowMessage(const uint8_t* address, uint8_t header, uint8_t data) = 0;
+  void handleEspNowMessage(const uint8_t* address, uint8_t header, uint8_t data)
+  {
+	switch(header)
+	{
+      case LINK_WIRELESS_HEADER_COMMAND_V2:
+	    onCommandV2(address, data);
+		break;
+      case LINK_WIRELESS_HEADER_PING_REQUEST:
+	    onPingRequest(address, data);
+		break; 
+      case LINK_WIRELESS_HEADER_PING_RESPONSE:
+	    onPingResponse(address, data);
+		break; 
+      case LINK_WIRELESS_HEADER_PAIRING_REQUEST:
+	    onPairingRequest(address, data);
+		break; 
+      case LINK_WIRELESS_HEADER_PAIRING_RESPONSE:
+	    onPairingResponse(address, data);
+		break; 
+	}
+  }
 };
 
 class EspNowInterface

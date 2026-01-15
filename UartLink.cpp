@@ -1,33 +1,6 @@
 #include "UartLink.h"
-#include "Codes.h"
 
 using namespace vgs::link;
-
-constexpr int numCommands = 8;
-
-constexpr char uartCommands[numCommands] = 
-{
-  LINK_BUTTON_PRESSED,
-  LINK_CLEAR,
-  LINK_CORRECT_PRESS_SIGNAL,
-  LINK_DISPLAY_CORRECT_PRESS_SIGNAL,
-  LINK_FALSTART_PRESS_SIGNAL,
-  LINK_DISPLAY_FALSTART_PRESS_SIGNAL,
-  LINK_PENDING_PRESS_SIGNAL,
-  LINK_GAME_START_SIGNAL
-};
-
-constexpr Command commands[numCommands] = 
-{
-  Command::ButtonPressed,
-  Command::Clear,
-  Command::CorrectPressSignal,
-  Command::DisplayCorrectPressSignal,
-  Command::FalstartPressSignal, 
-  Command::DisplayFalstartPressSignal,
-  Command::PendingPressSignal,
-  Command::GameStartSignal
-};
 
 UartLink::UartLink(UartLinkVersion version) : m_version(version)
 {
@@ -107,32 +80,14 @@ void UartLink::tickV2()
   m_command = Command::None;
   m_data = 0;
 
-  unsigned char raw;
+  unsigned char code;
 
-  if(!readUartData(raw))
+  if(!readUartData(code))
   {
     return;
   }
 
-  if(raw >= 0x80) // LINK_UPDATE_TIME 0x80 1xxxxxxx - x time in seconds (0000000 - 1111111, 0-127)
-  {
-    m_data = raw & 0x7F;
-    m_command = Command::UpdateTime;
-    return;
-  }
-
-  unsigned char command = raw & 0xF0;
-  unsigned char payload = raw & 0x0F;
-
-  for(int i=0; i<numCommands; i++)
-  {
-    if(command == uartCommands[i])
-    {
-      m_command = commands[i];
-      m_data = payload;
-      break;
-    }
-  }
+  codeToCommand(code, m_command, m_data);
 }
 
 void UartLink::sendV1(Command command, unsigned int data)
@@ -159,23 +114,10 @@ void UartLink::sendV1(Command command, unsigned int data)
 
 void UartLink::sendV2(Command command, unsigned int data)
 {
-  if(command == Command::None)
+  unsigned char code;
+  
+  if(commandToCode(command, data, code))
   {
-    return;
-  }
-
-  if(command == Command::UpdateTime)
-  {
-    writeUartData((unsigned char)LINK_UPDATE_TIME | (unsigned char)data);
-    return;
-  }
-
-  for(int i=0; i<numCommands; i++)
-  {
-    if(command == commands[i])
-    {
-      writeUartData((unsigned char)uartCommands[i] | ((unsigned char)data & 0x0F));
-      break;
-    }
+    writeUartData(code);
   }
 }

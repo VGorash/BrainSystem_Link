@@ -8,7 +8,7 @@ namespace vgs::link
 
   enum class UartLinkVersion
   {
-    V1, // outdated version. No display commands. Differece in player numbers (see commands in cpp file)
+    V1, // outdated version. No display commands. Differece in player numbers (see commands in Link.cpp file)
     V2, // current version
   };
 
