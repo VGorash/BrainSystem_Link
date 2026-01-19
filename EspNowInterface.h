@@ -15,8 +15,9 @@
 #define LINK_WIRELESS_HEADER_PING_RESPONSE 0x81 // payload - byte from ping request
 #define LINK_WIRELESS_HEADER_PAIRING_REQUEST 0x82 // payload - device code (see below)
 #define LINK_WIRELESS_HEADER_PAIRING_RESPONSE 0x83 // payload - device number in server list
+#define LINK_WIRELESS_HEADER_BATTERY_INFO 0x84 // payload - battery percentage (0-100)
 
-// wireless device codes (1 byte)
+// wireless device types (1 byte)
 #define LINK_WIRELESS_DEVICE_MASTER 0x00
 #define LINK_WIRELESS_DEVICE_BUTTON 0x01
 
@@ -31,27 +32,31 @@ protected:
   virtual void onPingResponse(const uint8_t* address, uint8_t data){}
   virtual void onPairingRequest(const uint8_t* address, uint8_t data){}
   virtual void onPairingResponse(const uint8_t* address, uint8_t data){}
+  virtual void onBatteryInfo(const uint8_t* address, uint8_t data){}
   
 public:
   void handleEspNowMessage(const uint8_t* address, uint8_t header, uint8_t data)
   {
-	switch(header)
-	{
+    switch(header)
+    {
       case LINK_WIRELESS_HEADER_COMMAND_V2:
-	    onCommandV2(address, data);
-		break;
+        onCommandV2(address, data);
+        break;
       case LINK_WIRELESS_HEADER_PING_REQUEST:
-	    onPingRequest(address, data);
-		break; 
+        onPingRequest(address, data);
+        break; 
       case LINK_WIRELESS_HEADER_PING_RESPONSE:
-	    onPingResponse(address, data);
-		break; 
+        onPingResponse(address, data);
+        break; 
       case LINK_WIRELESS_HEADER_PAIRING_REQUEST:
-	    onPairingRequest(address, data);
-		break; 
+        onPairingRequest(address, data);
+        break; 
       case LINK_WIRELESS_HEADER_PAIRING_RESPONSE:
-	    onPairingResponse(address, data);
-		break; 
+        onPairingResponse(address, data);
+        break; 
+      case LINK_WIRELESS_HEADER_BATTERY_INFO:
+        onBatteryInfo(address, data);
+        break;
 	}
   }
 };
@@ -62,30 +67,30 @@ class EspNowInterface
 public:
   static EspNowInterface* getInstance()
   {
-	static EspNowInterface* instance = new EspNowInterface();
-	static bool initialized = false;
-	if(!initialized)
-	{
-	  esp_now_register_recv_cb([](const esp_now_recv_info_t *info, const uint8_t *data, int len){instance->onDataRecv(info, data, len);});
-	  initialized = true;
-	}
-	
-	return instance;
+    static EspNowInterface* instance = new EspNowInterface();
+    static bool initialized = false;
+    if(!initialized)
+    {
+      esp_now_register_recv_cb([](const esp_now_recv_info_t *info, const uint8_t *data, int len){instance->onDataRecv(info, data, len);});
+      initialized = true;
+    }
+
+    return instance;
   }
   
   void setHandler(EspNowHandler* handler)
   {
-	m_handler = handler;
+    m_handler = handler;
   }
   
   void send(const uint8_t* address, uint8_t header, uint8_t data)
   {
-	if(!esp_now_is_peer_exist(address))
+    if(!esp_now_is_peer_exist(address))
     {
       addPeer(address);
     }
 	
-	uint8_t sendData[2];
+    uint8_t sendData[2];
     sendData[0] = header;
     sendData[1] = data;
     esp_now_send(address, sendData, 2);
@@ -94,15 +99,15 @@ public:
 private:  
   EspNowInterface()
   {
-	WiFi.mode(WIFI_STA);
-	WiFi.setChannel(1);
-	esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_LR);
-	esp_now_init();
+    WiFi.mode(WIFI_STA);
+    WiFi.setChannel(1);
+    esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_LR);
+    esp_now_init();
   };
   
   void addPeer(const uint8_t* address)
   {
-	esp_now_peer_info_t peer = {};
+    esp_now_peer_info_t peer = {};
     memcpy(peer.peer_addr, address, 6);
     peer.channel = 1;
     peer.encrypt = false;
@@ -118,10 +123,10 @@ private:
   
   void onDataRecv(const esp_now_recv_info_t *info, const uint8_t *data, int len)
   {
-	if(len == 2 && m_handler)  // all correct packages have size 2 (header + data)
-	{
-	  m_handler->handleEspNowMessage(info->src_addr, data[0], data[1]);
-	}
+    if(len == 2 && m_handler)  // all correct packages have size 2 (header + data)
+    {
+      m_handler->handleEspNowMessage(info->src_addr, data[0], data[1]);
+    }
   }
   
 private:  
