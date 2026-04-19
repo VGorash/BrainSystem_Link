@@ -20,6 +20,7 @@
 // wireless device types (1 byte)
 #define LINK_WIRELESS_DEVICE_MASTER 0x00
 #define LINK_WIRELESS_DEVICE_BUTTON 0x01
+#define LINK_WIRELESS_DEVICE_DISPLAY 0x02
 
 namespace vgs::link
 {
