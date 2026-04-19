@@ -115,8 +115,8 @@ private:
     esp_now_add_peer(&peer);
 
     esp_now_rate_config_t config = {};
-    config.phymode = WIFI_PHY_MODE_LR;
-    config.rate = WIFI_PHY_RATE_LORA_250K;
+    config.phymode = WIFI_PHY_MODE_11B;
+    config.rate = WIFI_PHY_RATE_1M_L;
     config.ersu = false;  
     config.dcm = false;
     esp_now_set_peer_rate_config(address, &config);
