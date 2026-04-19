@@ -102,7 +102,8 @@ private:
   {
     WiFi.mode(WIFI_STA);
     WiFi.setChannel(1);
-    esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_LR);
+    WiFi.setPhyMode(WIFI_PHY_MODE_11B);
+    //esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B);
     esp_now_init();
   };
   
